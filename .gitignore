@@ -11,4 +11,5 @@ wheels/
 
 .idea/
 .DS_STORE
-gi_rsh_output*.csv
+artifact_salvaging_helper_*.csv
+builds_output_*.json
