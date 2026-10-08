@@ -88,9 +88,10 @@ def scrape_builds(version: str):
 
                 is_priority_build = 0
 
-                # Check for the presence of the 'Best Role' badge and append a star to the build name if present
+                # Check for the presence of the 'Best Role' badge and append a star to the build name if present.
+                # Alternatively, if the character only has a single build treat it the same way.
                 build_badge = build_button.find('span', class_='build-badge')
-                if build_badge:
+                if build_badge or len(build_buttons) == 1:
                     build_name = build_name + ' ✩'
                     is_priority_build = 1
 
@@ -105,7 +106,6 @@ def scrape_builds(version: str):
 
                     artifacts_section = build_section.find('div', class_='artifact-sets-card')
                     if artifacts_section:
-
                         # Extract rank groups, each corresponding to a set of set options of comparable power, which we
                         # separate using `≈` characters in the final build string
                         artifact_rank_groups = artifacts_section.find_all('div', class_='rank-group')
@@ -121,7 +121,7 @@ def scrape_builds(version: str):
                             for artifact_rank_row in artifact_rank_rows:
                                 set_options = []
 
-                                set_name_elements = artifact_rank_row.find_all('span', class_='inline-note-label-emphasized')
+                                set_name_elements = artifact_rank_row.find_all('span', class_='recommendation-label-emphasized')
                                 artifact_count_suffixes = artifact_rank_row.find_all('span', class_='artifact-piece-suffix')
                                 for j, set_name_element in enumerate(set_name_elements):
                                     set_name = set_name_element.string
@@ -132,6 +132,13 @@ def scrape_builds(version: str):
                             build_string = ' ≈ '.join(rank_set_options)
                             build_string = inline_2pc_set_bonuses(build_string)
                             artifacts[i] = build_string
+
+                        # As of Aug 2026, Aino has no ranked set options, as all of her sets are instead listed under
+                        # the Conditional sets section that we've ignored for other agents. We compensate for this
+                        # simply by hardcoding those set options for her.
+                        if character_name == 'Aino':
+                            artifacts[0] = "Silken Moon's Serenade (4) ≈ Noblesse Oblige (4) ≈ Scroll of the Hero of Cinder City (4) ≈ Deepwood Memories (4)"
+
                     else:
                         print('Could not find Artifact Sets section')
 
